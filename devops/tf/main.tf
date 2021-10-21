@@ -13,8 +13,9 @@ provider "linode" {
 }
 
 resource "linode_instance" "cfe-pyapp" {
+    count = var.linode_instance_count
     image = "linode/ubuntu18.04"
-    label = "my_first_cfe_pyapp"
+    label = "pyapp-${count.index + 1}"
     group = "CFE_Terrafrom_PROJECT"
     region = var.region
     type = "g6-nanode-1"
