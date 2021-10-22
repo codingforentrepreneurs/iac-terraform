@@ -17,3 +17,7 @@ variable "root_user_pw" {
 variable "region" {
     default = "us-east"
 }
+
+variable "git_repo" {
+    default = "https://github.com/codingforentrepreneurs/iac-python"
+}

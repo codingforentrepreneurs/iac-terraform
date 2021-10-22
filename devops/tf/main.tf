@@ -45,7 +45,11 @@ resource "linode_instance" "cfe-pyapp" {
         inline = [
             "chmod +x /tmp/bootstrap-docker.sh",
             "sudo sh /tmp/bootstrap-docker.sh",
-            "docker run --restart always -p 80:80 -d nginx"
+            "mkdir -p /var/www/",
+            "git clone ${var.git_repo} /var/www/",
+            "cd /var/www/",
+            "docker build -f Dockerfile -t pyapp-via-git . ",
+            "docker run --restart always -p 80:8001 -e PORT=8001 -d pyapp-via-git"
         ]
     }
 
