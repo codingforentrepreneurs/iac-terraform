@@ -23,3 +23,8 @@ resource "linode_instance" "cfe-pyapp" {
     root_pass = var.root_user_pw
     tags = ["python", "docker", "terraform"]
 }
+
+resource "local_file" "ansible_inventory" {
+    content = join("\n", [for host in linode_instance.cfe-pyapp.*: "${host.ip_address}"])
+    filename = "${dirname(abspath(path.root))}/ansible/inventory.ini"
+}
