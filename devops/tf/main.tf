@@ -24,6 +24,17 @@ resource "linode_instance" "cfe-pyapp" {
     private_ip = true
     tags = ["python", "docker", "terraform"]
 
+     provisioner "file" {
+        connection {
+            host = "${self.ip_address}"
+            type = "ssh"
+            user = "root"
+            password = "${var.root_user_pw}"
+        }
+        source = "${local.project_dir}/bootstrap-docker.sh"
+        destination = "/tmp/bootstrap-docker.sh"
+    }
+
     provisioner "remote-exec" {
         connection {
             host = "${self.ip_address}"
@@ -32,31 +43,20 @@ resource "linode_instance" "cfe-pyapp" {
             password = "${var.root_user_pw}"
         }
         inline = [
-            "sudo apt-get update",
-            "sudo apt-get install curl -y",
-            "curl -fsSL https://get.docker.com -o get-docker.sh",
-            "sudo sh get-docker.sh",
+            "chmod +x /tmp/bootstrap-docker.sh",
+            "sudo sh /tmp/bootstrap-docker.sh",
             "docker run --restart always -p 80:80 -d nginx"
         ]
     }
 
-    # provisioner "file" {
-    #     connection {
-    #         host = "${self.ip_address}"
-    #         type = "ssh"
-    #         user = "root"
-    #         password = "${var.root_user_pw}"
-    #     }
-    #     content = "<h1>${self.ip_address}</h1>"
-    #     destination = "/var/www/html/index.nginx-debian.html"
-    # }
+   
     
 }
 
 resource "local_file" "ansible_inventory" {
     # content = join("\n", [for host in linode_instance.cfe-pyapp.*: "${host.ip_address}"])
-    content = templatefile("${abspath(path.root)}/templates/ansible-inventory.tpl", { hosts=[for host in linode_instance.cfe-pyapp.*: "${host.ip_address}"] })
-    filename = "${dirname(abspath(path.root))}/ansible/inventory.ini"
+    content = templatefile("${local.templates_dir}/ansible-inventory.tpl", { hosts=[for host in linode_instance.cfe-pyapp.*: "${host.ip_address}"] })
+    filename = "${local.devops_dir}/ansible/inventory.ini"
 }
 
 resource "linode_nodebalancer" "pycfe_nb" {
