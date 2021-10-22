@@ -45,8 +45,63 @@ resource "linode_instance" "cfe-pyapp" {
         inline = [
             "chmod +x /tmp/bootstrap-docker.sh",
             "sudo sh /tmp/bootstrap-docker.sh",
-            "mkdir -p /var/www/",
-            "git clone ${var.git_repo} /var/www/",
+            "mkdir -p /var/www/src/",
+        ]
+    }
+
+     provisioner "file" {
+        connection {
+            host = "${self.ip_address}"
+            type = "ssh"
+            user = "root"
+            password = "${var.root_user_pw}"
+        }
+        source = "${local.project_dir}/src/"
+        destination = "/var/www/src/"
+    }
+
+    provisioner "file" {
+        connection {
+            host = "${self.ip_address}"
+            type = "ssh"
+            user = "root"
+            password = "${var.root_user_pw}"
+        }
+        source = "${local.project_dir}/Dockerfile"
+        destination = "/var/www/Dockerfile"
+    }
+
+    provisioner "file" {
+        connection {
+            host = "${self.ip_address}"
+            type = "ssh"
+            user = "root"
+            password = "${var.root_user_pw}"
+        }
+        source = "${local.project_dir}/entrypoint.sh"
+        destination = "/var/www/entrypoint.sh"
+    }
+
+    provisioner "file" {
+        connection {
+            host = "${self.ip_address}"
+            type = "ssh"
+            user = "root"
+            password = "${var.root_user_pw}"
+        }
+        source = "${local.project_dir}/requirements.txt"
+        destination = "/var/www/requirements.txt"
+    }
+
+
+    provisioner "remote-exec" {
+        connection {
+            host = "${self.ip_address}"
+            type = "ssh"
+            user = "root"
+            password = "${var.root_user_pw}"
+        }
+        inline = [
             "cd /var/www/",
             "docker build -f Dockerfile -t pyapp-via-git . ",
             "docker run --restart always -p 80:8001 -e PORT=8001 -d pyapp-via-git"
