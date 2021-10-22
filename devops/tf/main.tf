@@ -25,6 +25,7 @@ resource "linode_instance" "cfe-pyapp" {
 }
 
 resource "local_file" "ansible_inventory" {
-    content = join("\n", [for host in linode_instance.cfe-pyapp.*: "${host.ip_address}"])
+    # content = join("\n", [for host in linode_instance.cfe-pyapp.*: "${host.ip_address}"])
+    content = templatefile("${abspath(path.root)}/templates/ansible-inventory.tpl", { hosts=[for host in linode_instance.cfe-pyapp.*: "${host.ip_address}"] })
     filename = "${dirname(abspath(path.root))}/ansible/inventory.ini"
 }
