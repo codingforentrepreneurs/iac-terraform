@@ -35,6 +35,17 @@ resource "linode_instance" "cfe-pyapp" {
             "sudo apt-get install nginx -y"
         ]
     }
+
+    provisioner "file" {
+        connection {
+            host = "${self.ip_address}"
+            type = "ssh"
+            user = "root"
+            password = "${var.root_user_pw}"
+        }
+        content = "<h1>${self.ip_address}</h1>"
+        destination = "/var/www/html/index.nginx-debian.html"
+    }
     
 }
 
