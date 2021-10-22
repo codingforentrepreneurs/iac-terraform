@@ -33,20 +33,23 @@ resource "linode_instance" "cfe-pyapp" {
         }
         inline = [
             "sudo apt-get update",
-            "sudo apt-get install nginx -y"
+            "sudo apt-get install curl -y",
+            "curl -fsSL https://get.docker.com -o get-docker.sh",
+            "sudo sh get-docker.sh",
+            "docker run --restart always -p 80:80 -d nginx"
         ]
     }
 
-    provisioner "file" {
-        connection {
-            host = "${self.ip_address}"
-            type = "ssh"
-            user = "root"
-            password = "${var.root_user_pw}"
-        }
-        content = "<h1>${self.ip_address}</h1>"
-        destination = "/var/www/html/index.nginx-debian.html"
-    }
+    # provisioner "file" {
+    #     connection {
+    #         host = "${self.ip_address}"
+    #         type = "ssh"
+    #         user = "root"
+    #         password = "${var.root_user_pw}"
+    #     }
+    #     content = "<h1>${self.ip_address}</h1>"
+    #     destination = "/var/www/html/index.nginx-debian.html"
+    # }
     
 }
 
