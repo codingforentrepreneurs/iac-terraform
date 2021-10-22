@@ -14,6 +14,7 @@ crash.log
 # control as they are data points which are potentially sensitive and subject
 # to change depending on the environment.
 #
+devops/tf/backend
 ansible/
 *.tfvars
 
