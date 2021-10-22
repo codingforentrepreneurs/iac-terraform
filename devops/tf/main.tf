@@ -22,6 +22,20 @@ resource "linode_instance" "cfe-pyapp" {
     authorized_keys = [ var.authorized_key ]
     root_pass = var.root_user_pw
     tags = ["python", "docker", "terraform"]
+
+    provisioner "remote-exec" {
+        connection {
+            host = "${self.ip_address}"
+            type = "ssh"
+            user = "root"
+            password = "${var.root_user_pw}"
+        }
+        inline = [
+            "sudo apt-get update",
+            "sudo apt-get install nginx -y"
+        ]
+    }
+    
 }
 
 resource "local_file" "ansible_inventory" {
