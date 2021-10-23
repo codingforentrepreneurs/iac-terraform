@@ -1,0 +1,48 @@
+image:
+  name: hashicorp/terraform:1.0.9
+  entrypoint:
+    - /usr/bin/env
+    - "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+before_script:
+  - rm -rf .terraform
+  - |
+    cat << EOF > devops/tf/backend
+    skip_credentials_validation = true
+    skip_region_validation = true
+    bucket="tryiac"
+    key="tryiac-terraform.tfstate"
+    region="us-southeast-1"
+    endpoint="us-southeast-1.linodeobjects.com"
+    access_key="$LINODE_OBJECT_STORAGE_ACCESS_KEY"
+    secret_key="$LINODE_OBJECT_STORAGE_SECRET_KEY"
+    EOF
+  - |
+    cat << EOF > devops/tf/terraform.tfvars
+    linode_pa_token="$LINODE_PA_TOKEN"
+    authorized_key="$SSH_PUB_KEY"
+    root_user_pw="$ROOT_USER_PW"
+    EOF
+
+  
+stages:
+ - validate
+ - apply
+ - destroy
+
+validate:
+  stage: validate
+  script:
+    - terraform -chdir=./devops/tf validate -no-color
+
+apply:
+  stage: apply
+  script:
+    - terraform -chdir=./devops/tf apply -auto-approve
+  when: manual
+
+destroy:
+  stage: destroy
+  script:
+    - terraform -chdir=./devops/tf apply -destroy -auto-approve
+  when: manual
